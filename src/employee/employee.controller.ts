@@ -10,14 +10,22 @@ import {
 } from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
 import { ROLE } from 'src/interface';
+import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
 import { EmployeeService } from './employee.service';
+import {
+  createEmployeeSchema,
+  updateEmployeeSchema,
+} from './schemas/employee.schema';
 
 @Controller('employee')
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {}
 
   @Post()
-  create(@Body() createEmployeeDto: Prisma.EmployeeCreateInput) {
+  create(
+    @Body(new ZodValidationPipe(createEmployeeSchema))
+    createEmployeeDto: Prisma.EmployeeCreateInput,
+  ) {
     return this.employeeService.create(createEmployeeDto);
   }
 
@@ -34,7 +42,8 @@ export class EmployeeController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateEmployeeDto: Prisma.EmployeeUpdateInput,
+    @Body(new ZodValidationPipe(updateEmployeeSchema))
+    updateEmployeeDto: Prisma.EmployeeUpdateInput,
   ) {
     return this.employeeService.update(+id, updateEmployeeDto);
   }
